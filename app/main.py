@@ -25,7 +25,6 @@ def add_feed_route(url: str):
 async def get_feed_content(lower_bound: int, upper_bound: int):
     feed_content = []
     for feed in get_feeds():
-        print(feed)
         parsed_feed = parse_rss(feed)
-        feed_content.extend(parsed_feed["entries"][lower_bound:upper_bound])
+        feed_content.extend(parsed_feed[lower_bound:upper_bound])
     return feed_content
