@@ -4,12 +4,10 @@ type RSSItem = {
     title: string;
     link: string;
     summary: string;
-    content: string;
-    pubDate: string;
-    creator: string;
+    media?: string;
+    published: string;
     categories: string[];
     id: string;
-    isoDate: string;
 }
 
 async function fetchContents(lowerBound: number, upperBound: number): Promise<void> {
@@ -55,6 +53,14 @@ function createFeedItem(itemContent: RSSItem): HTMLElement {
     item.classList.add("feed-item");
     const itemLink = document.createElement("a");
     itemLink.href = itemContent.link;
+    itemLink.target = "_blank";
+
+    if (itemContent.media) {
+        const media = document.createElement("img");
+        media.src = itemContent.media;
+        media.classList.add("feed-item-media");
+        item.appendChild(media);
+    }
 
     const itemTitle = document.createElement("h3");
     itemTitle.textContent = itemContent.title;

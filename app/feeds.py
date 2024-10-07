@@ -10,6 +10,7 @@ class FeedItem(TypedDict):
     link: str
     published: str
     summary: str
+    media: str | None # Only one image for now
 
 
 feeds: list[str] = ["https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET", "https://reddit.com/r/Suomi.rss"]
@@ -19,13 +20,23 @@ def parse_rss(url: str) -> list[FeedItem]:
     raw_feed = feedparser.parse(url)
     feed: list[FeedItem] = []
     for item in raw_feed["entries"]:
+        media = None
+        if "media_thumbnail" in item:
+            media = item["media_thumbnail"][0]["url"]
         if item["summary"].startswith("<"):
             # Probably HTML, let's strip it
             soup = BeautifulSoup(item["summary"], "html.parser")
             summary = soup.get_text()
         else:
             summary = item["summary"]
-        feed_item = FeedItem(title=item["title"], id=uuid4(), link=item["link"], published=item["published"], summary=summary)
+        feed_item = FeedItem(
+            title=item["title"],
+            id=uuid4(),
+            link=item["link"],
+            published=item["published"],
+            summary=summary,
+            media=media
+            )
         feed.append(feed_item)
     return feed
 

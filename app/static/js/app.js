@@ -54,6 +54,13 @@ function createFeedItem(itemContent) {
     item.classList.add("feed-item");
     const itemLink = document.createElement("a");
     itemLink.href = itemContent.link;
+    itemLink.target = "_blank";
+    if (itemContent.media) {
+        const media = document.createElement("img");
+        media.src = itemContent.media;
+        media.classList.add("feed-item-media");
+        item.appendChild(media);
+    }
     const itemTitle = document.createElement("h3");
     itemTitle.textContent = itemContent.title;
     const summary = document.createElement("p");
