@@ -30,6 +30,11 @@ main {
     gap: 10px;
 }
 
+a {
+    color: var(--color-text-primary);
+    text-decoration: none;
+}
+
 p {
     color: var(--color-text-secondary);
     margin: 0;

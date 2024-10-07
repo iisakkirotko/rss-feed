@@ -52,12 +52,15 @@ function createFeedItem(itemContent) {
     const item = document.createElement("div");
     const contentContainer = document.createElement("div");
     item.classList.add("feed-item");
+    const itemLink = document.createElement("a");
+    itemLink.href = itemContent.link;
     const itemTitle = document.createElement("h3");
     itemTitle.textContent = itemContent.title;
     const summary = document.createElement("p");
     summary.textContent = itemContent.summary;
-    contentContainer.appendChild(itemTitle);
-    contentContainer.appendChild(summary);
+    itemLink.appendChild(itemTitle);
+    itemLink.appendChild(summary);
+    contentContainer.appendChild(itemLink);
     item.appendChild(contentContainer);
     item.appendChild(createActions(itemContent.id));
     return item;
