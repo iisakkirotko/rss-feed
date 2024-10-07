@@ -74,13 +74,22 @@ function createActions(itemId: string): HTMLDivElement {
     actionsContainer.classList.add("post-actions");
 
     const likeButton = document.createElement("button");
-    likeButton.textContent = "Like";
+    const likeIcon = document.createElement("span");
+    likeIcon.classList.add("material-symbols-outlined");
+    likeIcon.textContent = "favorite";
+    likeButton.appendChild(likeIcon);
+
     likeButton.addEventListener("click", () => {
         console.log("Liked post", itemId);
+        likeButton.classList.toggle("liked");
     });
 
     const hideButton = document.createElement("button");
-    hideButton.textContent = "Hide";
+    const hideIcon = document.createElement("span");
+    hideIcon.classList.add("material-symbols-outlined");
+    hideIcon.textContent = "visibility_off";
+    hideButton.appendChild(hideIcon);
+
     hideButton.addEventListener("click", () => {
         console.log("Hid post", itemId);
     });
