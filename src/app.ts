@@ -29,6 +29,10 @@ async function fetchContents(lowerBound: number, upperBound: number): Promise<vo
         }
         const content = await response.json()
         console.log("content", content);
+        const loader = document.getElementById("loader-container");
+        if (loader) {
+            loader.remove();
+        }
         for (const item of content) {
             container.appendChild(createFeedItem(item));
         }
@@ -99,6 +103,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (entry.intersectionRatio > 0) {
+                    const loaderContainer = document.createElement("div");
+                    loaderContainer.id = "loader-container";
+                    const loader = document.createElement("div");
+                    loader.id = "loader";
+                    loaderContainer.appendChild(loader);
+
+                    const feedContainer = document.getElementById("feed");
+                    if (feedContainer) {
+                        feedContainer.appendChild(loaderContainer);
+                    }
+                    
                     startIndex = endIndex;
                     endIndex += 10;
                     fetchContents(startIndex, endIndex);
