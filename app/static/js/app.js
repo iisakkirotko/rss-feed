@@ -43,6 +43,7 @@ function fetchContents(lowerBound, upperBound) {
 }
 function createFeedItem(itemContent) {
     const item = document.createElement("div");
+    item.id = itemContent.id;
     const contentContainer = document.createElement("div");
     item.classList.add("feed-item");
     const itemLink = document.createElement("a");
@@ -84,6 +85,13 @@ function createActions(itemId) {
     hideButton.appendChild(hideIcon);
     hideButton.addEventListener("click", () => {
         console.log("Hid post", itemId);
+        const post = document.getElementById(itemId);
+        if (post) {
+            post.classList.add("hidden");
+            setTimeout(() => {
+                post.remove();
+            }, 750);
+        }
     });
     actionsContainer.appendChild(likeButton);
     actionsContainer.appendChild(hideButton);

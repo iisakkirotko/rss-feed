@@ -41,6 +41,7 @@ async function fetchContents(lowerBound: number, upperBound: number): Promise<vo
 
 function createFeedItem(itemContent: RSSItem): HTMLElement {
     const item = document.createElement("div");
+    item.id = itemContent.id;
     const contentContainer = document.createElement("div");
     item.classList.add("feed-item");
     const itemLink = document.createElement("a");
@@ -92,6 +93,13 @@ function createActions(itemId: string): HTMLDivElement {
 
     hideButton.addEventListener("click", () => {
         console.log("Hid post", itemId);
+        const post = document.getElementById(itemId);
+        if (post) {
+            post.classList.add("hidden");
+            setTimeout(() => {
+                post.remove();
+            }, 750);
+        }
     });
 
     actionsContainer.appendChild(likeButton);
