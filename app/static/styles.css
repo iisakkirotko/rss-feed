@@ -101,8 +101,8 @@ button {
 
 @media screen and (prefers-color-scheme: dark) {
     :root {
-        --color-background: #1c1d1f;
-        --color-background-secondary: #2b2c2f;
+        --color-background: #0f1212;
+        --color-background-secondary: #1f2123;
         --color-text-primary: #fff;
         --color-text-secondary: #b0b0b0;
     }
