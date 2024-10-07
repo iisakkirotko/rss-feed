@@ -35,18 +35,6 @@ async function fetchContents(lowerBound: number, upperBound: number): Promise<vo
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    try {
-        fetchContents(0, 10);
-    } catch (error) {
-        const snackbar = document.createElement("div");
-        snackbar.textContent = `${error}`;
-        snackbar.classList.add("snackbar", "error");
-        document.appendChild(snackbar);
-    }
-});
-
-
 function createFeedItem(itemContent: RSSItem): HTMLElement {
     const item = document.createElement("div");
     const contentContainer = document.createElement("div");
@@ -98,3 +86,37 @@ function createActions(itemId: string): HTMLDivElement {
 
     return actionsContainer;
 }
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        let startIndex = 0;
+        let endIndex = 10;
+        await fetchContents(startIndex, endIndex);
+        const feedEnd = document.querySelector('#bottom-of-feed');
+
+        // Observe the bottom of the feed container coming into view to trigger loading more content
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.intersectionRatio > 0) {
+                    startIndex = endIndex;
+                    endIndex += 10;
+                    fetchContents(startIndex, endIndex);
+                }
+            });
+        }, {
+            root: null, // use the viewport as the root
+            threshold: 0.1
+        });
+
+        if (!feedEnd) {
+            throw new Error("Failed to find feed container");
+        }
+        observer.observe(feedEnd);
+    } catch (error) {
+        const snackbar = document.createElement("div");
+        snackbar.textContent = `${error}`;
+        snackbar.classList.add("snackbar", "error");
+        document.appendChild(snackbar);
+    }
+});
