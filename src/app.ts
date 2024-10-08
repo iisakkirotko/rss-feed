@@ -8,6 +8,8 @@ type RSSItem = {
     published: string;
     categories: string[];
     id: string;
+    liked: boolean;
+    hidden: boolean;
 }
 
 async function fetchContents(lowerBound: number, upperBound: number): Promise<void> {
@@ -80,9 +82,14 @@ function createActions(itemId: string): HTMLDivElement {
     likeIcon.textContent = "favorite";
     likeButton.appendChild(likeIcon);
 
-    likeButton.addEventListener("click", () => {
+    likeButton.addEventListener("click", async () => {
         console.log("Liked post", itemId);
         likeButton.classList.toggle("liked");
+        const response = await fetch(`/api/like?id=${itemId}`, {method: "POST"});
+        if (response.status !== 200) {
+            likeButton.classList.toggle("liked");
+            console.error(`Failed to like post: ${response}`);
+        }
     });
 
     const hideButton = document.createElement("button");
@@ -91,14 +98,20 @@ function createActions(itemId: string): HTMLDivElement {
     hideIcon.textContent = "visibility_off";
     hideButton.appendChild(hideIcon);
 
-    hideButton.addEventListener("click", () => {
+    hideButton.addEventListener("click", async () => {
         console.log("Hid post", itemId);
         const post = document.getElementById(itemId);
         if (post) {
             post.classList.add("hidden");
-            setTimeout(() => {
-                post.remove();
-            }, 750);
+            const response = await fetch(`/api/hide?id=${itemId}`, {method: "POST"});
+            if (response.status !== 200) {
+                post.classList.remove("hidden");
+                console.error(`Failed to hide post: ${response}`);
+            } else {
+                setTimeout(() => {
+                    post.remove();
+                }, 750);
+            }
         }
     });
 

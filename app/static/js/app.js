@@ -74,25 +74,37 @@ function createActions(itemId) {
     likeIcon.classList.add("material-symbols-outlined");
     likeIcon.textContent = "favorite";
     likeButton.appendChild(likeIcon);
-    likeButton.addEventListener("click", () => {
+    likeButton.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
         console.log("Liked post", itemId);
         likeButton.classList.toggle("liked");
-    });
+        const response = yield fetch(`/api/like?id=${itemId}`, { method: "POST" });
+        if (response.status !== 200) {
+            likeButton.classList.toggle("liked");
+            console.error(`Failed to like post: ${response}`);
+        }
+    }));
     const hideButton = document.createElement("button");
     const hideIcon = document.createElement("span");
     hideIcon.classList.add("material-symbols-outlined");
     hideIcon.textContent = "visibility_off";
     hideButton.appendChild(hideIcon);
-    hideButton.addEventListener("click", () => {
+    hideButton.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
         console.log("Hid post", itemId);
         const post = document.getElementById(itemId);
         if (post) {
             post.classList.add("hidden");
-            setTimeout(() => {
-                post.remove();
-            }, 750);
+            const response = yield fetch(`/api/hide?id=${itemId}`, { method: "POST" });
+            if (response.status !== 200) {
+                post.classList.remove("hidden");
+                console.error(`Failed to hide post: ${response}`);
+            }
+            else {
+                setTimeout(() => {
+                    post.remove();
+                }, 750);
+            }
         }
-    });
+    }));
     actionsContainer.appendChild(likeButton);
     actionsContainer.appendChild(hideButton);
     return actionsContainer;
