@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-console.log("Hello, world!");
 function fetchContents(lowerBound, upperBound) {
     return __awaiter(this, void 0, void 0, function* () {
         let response = null;
@@ -18,10 +17,8 @@ function fetchContents(lowerBound, upperBound) {
         catch (error) {
             throw new Error(`Failed to fetch contents: ${error}`);
         }
-        console.log("response", response);
         if ((response === null || response === void 0 ? void 0 : response.status) !== 200) {
-            console.error("Failed to fetch contents");
-            return;
+            throw new Error(`invalid response: ${response}`);
         }
         else {
             console.log("Fetched contents successfully");

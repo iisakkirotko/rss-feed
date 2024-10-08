@@ -18,7 +18,7 @@ class FeedItem(TypedDict):
     hidden: bool
 
 
-feeds: list[str] = ["https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET", "https://reddit.com/r/Suomi.rss"]
+feeds: list[str] = ["https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET", "https://old.reddit.com/r/Suomi.rss?limit=100", "https://feeds.nos.nl/nosnieuwsalgemeen", "https://feeds.nos.nl/nosnieuwspolitiek"]
 
 
 async def parse_rss(url: str) -> list[FeedItem]:

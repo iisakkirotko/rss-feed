@@ -1,5 +1,3 @@
-console.log("Hello, world!");
-
 type RSSItem = {
     title: string;
     link: string;
@@ -19,10 +17,8 @@ async function fetchContents(lowerBound: number, upperBound: number): Promise<vo
     } catch (error) {
         throw new Error(`Failed to fetch contents: ${error}`);
     }
-    console.log("response", response);
     if (response?.status !== 200) {
-        console.error("Failed to fetch contents");
-        return;
+        throw new Error(`invalid response: ${response}`);
     } else {
         console.log("Fetched contents successfully");
         const container = document.getElementById("feed");
@@ -143,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     if (feedContainer) {
                         feedContainer.appendChild(loaderContainer);
                     }
-                    
+
                     startIndex = endIndex;
                     endIndex += 10;
                     fetchContents(startIndex, endIndex);
