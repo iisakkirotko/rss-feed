@@ -49,9 +49,5 @@ dependencies = [
 ]
 
 [[tool.mypy.overrides]]
-module = "feedparser.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "apscheduler.*"
+module = "feedparser.*,apscheduler.*"
 ignore_missing_imports = true
