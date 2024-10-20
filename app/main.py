@@ -27,7 +27,7 @@ async def process_feed():
     feed_content = []
     feeds = await get_feeds()
     for feed in feeds:
-        feed_content += await parse_rss(feed)
+        feed_content += await parse_rss(feed["url"])
     shuffle(feed_content)
     return feed_content
 

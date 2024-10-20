@@ -50,13 +50,20 @@ async def parse_rss(url: str) -> list[FeedItem]:
             )
         feed.append(feed_item)
 
-    query = items.insert().values(feed)
-    await database.execute(query)
+    if feed != []:
+        try:
+            query = items.insert().values(feed)
+            await database.execute(query)
+        except Exception as e:
+            print(f"Failed to insert feed: {e}, feed was: {feed}")
 
     guid_feed = []
     if guids_to_fetch != []:
-        guids_query = items.select().where(items.c.guid.in_(guids_to_fetch))
-        guid_feed = await database.fetch_all(guids_query)
+        try:
+            guids_query = items.select().where(items.c.guid.in_(guids_to_fetch))
+            guid_feed = await database.fetch_all(guids_query)
+        except Exception as e:
+            print(f"Failed to fetch guids: {e}")
     
     return_feed: list[FeedItem] = feed + guid_feed # type: ignore
     return  return_feed
@@ -74,8 +81,9 @@ async def get_feeds():
     feeds_list = await database.fetch_all(feeds.select())
     if feeds_list == []:
         # Insert default values
-        defaults = ["https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET", "https://old.reddit.com/r/Suomi.rss?limit=100", "https://feeds.nos.nl/nosnieuwsalgemeen", "https://feeds.nos.nl/nosnieuwspolitiek"]
-        query = feeds.insert().values([{"url": url} for url in defaults])
+        def_feeds = ["https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET", "https://old.reddit.com/r/Suomi.rss?limit=100", "https://feeds.nos.nl/nosnieuwsalgemeen", "https://feeds.nos.nl/nosnieuwspolitiek"]
+        defaults = [{"url": url} for url in def_feeds]
+        query = feeds.insert().values(defaults)
         await database.execute(query)
         return defaults
     return feeds_list
