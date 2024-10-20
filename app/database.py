@@ -21,3 +21,9 @@ items = Table(
     Column("liked", Integer, nullable=False, default=0, server_default="0"),
     Column("hidden", Integer, nullable=False, default=0, server_default="0"),
 )
+
+feeds = Table(
+    "feeds",
+    metadata,
+    Column("url", String, primary_key=True),
+)

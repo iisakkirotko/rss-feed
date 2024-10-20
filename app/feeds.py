@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from bs4 import BeautifulSoup
 
 from .utils import record_to_guid
-from .database import items, database
+from .database import items, database, feeds
 
 class FeedItem(TypedDict):
     title: str
@@ -16,9 +16,6 @@ class FeedItem(TypedDict):
     media: str | None # Only one image for now
     liked: bool
     hidden: bool
-
-
-feeds: list[str] = ["https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET", "https://old.reddit.com/r/Suomi.rss?limit=100", "https://feeds.nos.nl/nosnieuwsalgemeen", "https://feeds.nos.nl/nosnieuwspolitiek"]
 
 
 async def parse_rss(url: str) -> list[FeedItem]:
@@ -66,13 +63,20 @@ async def parse_rss(url: str) -> list[FeedItem]:
     return  return_feed
 
 
-def add_feed(url: str):
-    feeds.append(url)
+async def add_feed(url: str):
+    try:
+        await database.execute(feeds.insert().values(url=url))
+    except Exception as e:
+        return {"message": f"Failed to add feed: {e}"}
     return {"message": "Feed added successfully"}
 
 
-def get_feeds():
-    return feeds
-
-
-
+async def get_feeds():
+    feeds_list = await database.fetch_all(feeds.select())
+    if feeds_list == []:
+        # Insert default values
+        defaults = ["https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET", "https://old.reddit.com/r/Suomi.rss?limit=100", "https://feeds.nos.nl/nosnieuwsalgemeen", "https://feeds.nos.nl/nosnieuwspolitiek"]
+        query = feeds.insert().values(defaults)
+        await database.execute(query)
+        return defaults
+    return feeds_list

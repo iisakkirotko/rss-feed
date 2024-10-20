@@ -25,7 +25,8 @@ cache: dict[str, CacheItem] = {}
 
 async def process_feed():
     feed_content = []
-    for feed in get_feeds():
+    feeds = await get_feeds()
+    for feed in feeds:
         feed_content += await parse_rss(feed)
     shuffle(feed_content)
     return feed_content
