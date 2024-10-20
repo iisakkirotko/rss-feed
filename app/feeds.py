@@ -50,9 +50,8 @@ async def parse_rss(url: str) -> list[FeedItem]:
             )
         feed.append(feed_item)
 
-    if feed == []:
-        query = items.insert().values(feed)
-        await database.execute(query)
+    query = items.insert().values(feed)
+    await database.execute(query)
 
     guid_feed = []
     if guids_to_fetch != []:
@@ -76,7 +75,7 @@ async def get_feeds():
     if feeds_list == []:
         # Insert default values
         defaults = ["https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET", "https://old.reddit.com/r/Suomi.rss?limit=100", "https://feeds.nos.nl/nosnieuwsalgemeen", "https://feeds.nos.nl/nosnieuwspolitiek"]
-        query = feeds.insert().values(defaults)
+        query = feeds.insert().values([{"url": url} for url in defaults])
         await database.execute(query)
         return defaults
     return feeds_list
