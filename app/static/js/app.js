@@ -13,27 +13,26 @@ function fetchContents(lowerBound, upperBound) {
         let response = null;
         try {
             response = yield fetch(`/api/feed?lower_bound=${lowerBound}&upper_bound=${upperBound}`);
-        }
-        catch (error) {
-            throw new Error(`Failed to fetch contents: ${error}`);
-        }
-        if ((response === null || response === void 0 ? void 0 : response.status) !== 200) {
-            throw new Error(`invalid response: ${response}`);
-        }
-        else {
+            if ((response === null || response === void 0 ? void 0 : response.status) !== 200) {
+                throw new Error(`invalid response: ${response}`);
+            }
             console.log("Fetched contents successfully");
             const container = document.getElementById("feed");
             if (!container) {
                 throw new Error("Failed to find feed container");
             }
             const content = yield response.json();
-            console.log("content", content);
+            for (const item of content) {
+                container.appendChild(createFeedItem(item));
+            }
+        }
+        catch (error) {
+            throw new Error(`Failed to fetch contents: ${error}`);
+        }
+        finally {
             const loader = document.getElementById("loader-container");
             if (loader) {
                 loader.remove();
-            }
-            for (const item of content) {
-                container.appendChild(createFeedItem(item));
             }
         }
     });
