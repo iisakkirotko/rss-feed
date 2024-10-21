@@ -59,24 +59,32 @@ function createFeedItem(itemContent) {
     itemLink.appendChild(summary);
     contentContainer.appendChild(itemLink);
     item.appendChild(contentContainer);
-    item.appendChild(createActions(itemContent.id));
+    item.appendChild(createActions(itemContent));
     return item;
 }
-function createActions(itemId) {
+function createActions(item) {
     const actionsContainer = document.createElement("div");
     actionsContainer.classList.add("post-actions");
     const likeButton = document.createElement("button");
     const likeIcon = document.createElement("span");
     likeIcon.classList.add("material-symbols-outlined");
+    if (item.liked) {
+        likeButton.classList.add("liked");
+    }
     likeIcon.textContent = "favorite";
     likeButton.appendChild(likeIcon);
     likeButton.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
-        console.log("Liked post", itemId);
+        console.log("Liked post", item.id);
         likeButton.classList.toggle("liked");
-        const response = yield fetch(`/api/like?id=${itemId}`, { method: "POST" });
-        if (response.status !== 200) {
+        try {
+            const response = yield fetch(`/api/like?id=${item.id}`, { method: "POST" });
+            if (response.status !== 200) {
+                throw new Error(`Invalid response: ${response}`);
+            }
+        }
+        catch (error) {
             likeButton.classList.toggle("liked");
-            console.error(`Failed to like post: ${response}`);
+            console.error(`Failed to like post: ${error}`);
         }
     }));
     const hideButton = document.createElement("button");
@@ -85,11 +93,11 @@ function createActions(itemId) {
     hideIcon.textContent = "visibility_off";
     hideButton.appendChild(hideIcon);
     hideButton.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
-        console.log("Hid post", itemId);
-        const post = document.getElementById(itemId);
+        console.log("Hid post", item.id);
+        const post = document.getElementById(item.id);
         if (post) {
             post.classList.add("hidden");
-            const response = yield fetch(`/api/hide?id=${itemId}`, { method: "POST" });
+            const response = yield fetch(`/api/hide?id=${item.id}`, { method: "POST" });
             if (response.status !== 200) {
                 post.classList.remove("hidden");
                 console.error(`Failed to hide post: ${response}`);
