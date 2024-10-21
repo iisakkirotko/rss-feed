@@ -14,8 +14,8 @@ class FeedItem(TypedDict):
     published: str
     summary: str
     media: str | None # Only one image for now
-    liked: bool
-    hidden: bool
+    liked: int # 0 or 1
+    hidden: int # 0 or 1
 
 
 async def parse_rss(url: str) -> list[FeedItem]:
