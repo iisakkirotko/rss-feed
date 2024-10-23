@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, UUID, String, Integer
 from databases import Database
+import uuid
 
 DATABASE_URL = "sqlite:///./items.db"
 
@@ -27,3 +28,7 @@ feeds = Table(
     metadata,
     Column("url", String, primary_key=True),
 )
+
+async def toggle_like(id: uuid.UUID):
+    query = items.update().where(items.c.id == id).values(liked=1 - items.c.liked).returning(*items.c)
+    return await database.fetch_one(query)

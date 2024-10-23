@@ -13,7 +13,7 @@ from datetime import datetime
 import feedparser
 
 from .feeds import FeedItem, add_feed, get_feeds, parse_rss
-from .database import metadata, database, engine, items
+from .database import metadata, database, engine, items, toggle_like
 
 
 class CacheItem(TypedDict):
@@ -109,10 +109,29 @@ async def end_session(request: Request):
 
 
 @app.post("/api/like")
-async def like_feed_item(id: str):
-    query = items.update().where(items.c.id == UUID(id)).values(liked=True)
-    await database.execute(query)
-    return {"message": f"Feed item {id} liked successfully"}
+async def like_feed_item(request: Request, id: str):
+    session_id = request.cookies.get("session_id", None)
+    if session_id is None:
+        return Response("Session ID not found", status_code=400)
+    
+    try:
+        item_after = await toggle_like(UUID(id))
+        
+        feed = cache[session_id]["feed"]
+        new_feed = []
+        for item in feed:
+            if item["id"] == UUID(id):
+                item = item_after
+            new_feed.append(item)
+        cache[session_id] = {"feed": new_feed, "cached_at": datetime.now()}
+    
+        if item_after["liked"]:
+            return {"message": f"Feed item {id} liked successfully"}
+        return {"message": f"Like removed from item {id} successfully"}
+    
+    except Exception as e:
+        print("ERRROR", e)
+        return Response(f"Failed to like item {id}: {e}", status_code=500)
 
 
 @app.post("/api/hide")
