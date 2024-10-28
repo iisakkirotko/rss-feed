@@ -13,8 +13,9 @@ function fetchContents(lowerBound, upperBound) {
         let response = null;
         try {
             response = yield fetch(`/api/feed?lower_bound=${lowerBound}&upper_bound=${upperBound}`);
-            if ((response === null || response === void 0 ? void 0 : response.status) !== 200) {
-                throw new Error(`invalid response: ${response}`);
+            if (response.status !== 200) {
+                const responseText = yield response.text();
+                throw new Error(`invalid response: ${responseText}`);
             }
             console.log("Fetched contents successfully");
             const container = document.getElementById("feed");
@@ -79,12 +80,14 @@ function createActions(item) {
         try {
             const response = yield fetch(`/api/like?id=${item.id}`, { method: "POST" });
             if (response.status !== 200) {
-                throw new Error(`Invalid response: ${response}`);
+                const responseText = yield response.text();
+                throw new Error(`Invalid response: ${responseText}`);
             }
         }
         catch (error) {
             likeButton.classList.toggle("liked");
             console.error(`Failed to like post: ${error}`);
+            createSnackbar(`Failed to like post: ${error}`, true, 6000);
         }
     }));
     const hideButton = document.createElement("button");
@@ -100,7 +103,8 @@ function createActions(item) {
             const response = yield fetch(`/api/hide?id=${item.id}`, { method: "POST" });
             if (response.status !== 200) {
                 post.classList.remove("hidden");
-                console.error(`Failed to hide post: ${response}`);
+                const responseText = yield response.text();
+                console.error(`Failed to hide post: ${responseText}`);
             }
             else {
                 setTimeout(() => {
@@ -112,6 +116,32 @@ function createActions(item) {
     actionsContainer.appendChild(likeButton);
     actionsContainer.appendChild(hideButton);
     return actionsContainer;
+}
+function createSnackbar(message, error, timeout) {
+    const snackbar = document.createElement("div");
+    snackbar.textContent = `${message}`;
+    snackbar.classList.add("snackbar");
+    if (error) {
+        snackbar.classList.add("error");
+    }
+    // Create a close button
+    const closeButton = document.createElement("button");
+    // Add the close icon to the button
+    const closeIcon = document.createElement("span");
+    closeIcon.classList.add("material-symbols-outlined");
+    closeIcon.textContent = "close";
+    closeButton.appendChild(closeIcon);
+    closeButton.classList.add("close");
+    closeButton.addEventListener("click", () => {
+        snackbar.remove();
+    });
+    snackbar.appendChild(closeButton);
+    document.getElementsByTagName("body")[0].appendChild(snackbar);
+    if (timeout) {
+        setTimeout(() => {
+            snackbar.remove();
+        }, timeout);
+    }
 }
 document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -134,7 +164,13 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, vo
                     }
                     startIndex = endIndex;
                     endIndex += 10;
-                    fetchContents(startIndex, endIndex);
+                    try {
+                        fetchContents(startIndex, endIndex);
+                    }
+                    catch (error) {
+                        console.error(`Failed to load contents: ${error}`);
+                        createSnackbar(`Failed to load contents: ${error}`, true, 6000);
+                    }
                 }
             });
         }, {
@@ -147,9 +183,7 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, vo
         observer.observe(feedEnd);
     }
     catch (error) {
-        const snackbar = document.createElement("div");
-        snackbar.textContent = `${error}`;
-        snackbar.classList.add("snackbar", "error");
-        document.appendChild(snackbar);
+        console.error(`Failed to load contents: ${error}`);
+        createSnackbar(`Failed to load contents: ${error}`, true, 6000);
     }
 }));

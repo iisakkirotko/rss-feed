@@ -14,8 +14,9 @@ async function fetchContents(lowerBound: number, upperBound: number): Promise<vo
     let response: Response | null = null;
     try {
         response = await fetch(`/api/feed?lower_bound=${lowerBound}&upper_bound=${upperBound}`);
-        if (response?.status !== 200) {
-            throw new Error(`invalid response: ${response}`);
+        if (response.status !== 200) {
+            const responseText = await response.text();
+            throw new Error(`invalid response: ${responseText}`);
         }
         console.log("Fetched contents successfully");
         const container = document.getElementById("feed");
@@ -86,11 +87,13 @@ function createActions(item: RSSItem): HTMLDivElement {
         try {
             const response = await fetch(`/api/like?id=${item.id}`, {method: "POST"});
             if (response.status !== 200) {
-                throw new Error(`Invalid response: ${response}`);
+                const responseText = await response.text();
+                throw new Error(`Invalid response: ${responseText}`);
             }
         } catch (error) {
             likeButton.classList.toggle("liked");
             console.error(`Failed to like post: ${error}`);
+            createSnackbar(`Failed to like post: ${error}`, true, 6000);
         }
     });
 
@@ -108,7 +111,8 @@ function createActions(item: RSSItem): HTMLDivElement {
             const response = await fetch(`/api/hide?id=${item.id}`, {method: "POST"});
             if (response.status !== 200) {
                 post.classList.remove("hidden");
-                console.error(`Failed to hide post: ${response}`);
+                const responseText = await response.text();
+                console.error(`Failed to hide post: ${responseText}`);
             } else {
                 setTimeout(() => {
                     post.remove();
@@ -121,6 +125,35 @@ function createActions(item: RSSItem): HTMLDivElement {
     actionsContainer.appendChild(hideButton);
 
     return actionsContainer;
+}
+
+function createSnackbar(message: string, error: boolean, timeout: number): void {
+    const snackbar = document.createElement("div");
+    snackbar.textContent = `${message}`;
+    snackbar.classList.add("snackbar");
+    if (error) {
+        snackbar.classList.add("error");
+    }
+    // Create a close button
+    const closeButton = document.createElement("button");
+
+    // Add the close icon to the button
+    const closeIcon = document.createElement("span");
+    closeIcon.classList.add("material-symbols-outlined");
+    closeIcon.textContent = "close";
+    closeButton.appendChild(closeIcon);
+
+    closeButton.classList.add("close");
+    closeButton.addEventListener("click", () => {
+        snackbar.remove();
+    });
+    snackbar.appendChild(closeButton);
+    document.getElementsByTagName("body")[0].appendChild(snackbar);
+    if (timeout) {
+        setTimeout(() => {
+            snackbar.remove();
+        }, timeout);
+    }
 }
 
 
@@ -148,7 +181,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     startIndex = endIndex;
                     endIndex += 10;
-                    fetchContents(startIndex, endIndex);
+                    try {
+                        fetchContents(startIndex, endIndex);
+                    } catch (error) {
+                        console.error(`Failed to load contents: ${error}`);
+                        createSnackbar(`Failed to load contents: ${error}`, true, 6000);
+                    }
                 }
             });
         }, {
@@ -161,9 +199,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         observer.observe(feedEnd);
     } catch (error) {
-        const snackbar = document.createElement("div");
-        snackbar.textContent = `${error}`;
-        snackbar.classList.add("snackbar", "error");
-        document.appendChild(snackbar);
+        console.error(`Failed to load contents: ${error}`);
+        createSnackbar(`Failed to load contents: ${error}`, true, 6000);
     }
 });

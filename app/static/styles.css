@@ -67,7 +67,18 @@ button {
     padding: 10px 20px;
     border-radius: 5px;
     z-index: 1;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
 }
+    .snackbar button.close {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
 .feed-item {
     position: relative;
