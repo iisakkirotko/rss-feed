@@ -92,11 +92,12 @@ async def get_feed_content(request: Request, lower_bound: int, upper_bound: int)
 async def refresh_feed(request: Request):
     session_id = request.cookies.get("session_id", None)
     if session_id is None:
-        return Response("Session ID not found", status_code=400)
+        session_id = str(uuid4())
+
     
     feed = await process_feed()
     cache[session_id] = {"feed": feed, "cached_at": datetime.now()}
-    return {"message": "Feed refreshed"}
+    return Response("Feed refreshed").set_cookie("session_id", session_id, max_age=3600)
 
 
 @app.post("/api/end_session")
@@ -127,8 +128,9 @@ async def like_feed_item(request: Request, id: str):
         cache[session_id] = {"feed": new_feed, "cached_at": datetime.now()}
     
         if item_after["liked"]:
-            return {"message": f"Feed item {id} liked successfully"}
-        return {"message": f"Like removed from item {id} successfully"}
+            response = Response(f"Feed item {id} liked successfully")
+        response = Response(f"Like removed from item {id} successfully")
+        return response.set_cookie("session_id", session_id, max_age=3600)
     
     except Exception as e:
         print("ERRROR", e)
@@ -136,11 +138,15 @@ async def like_feed_item(request: Request, id: str):
 
 
 @app.post("/api/hide")
-async def hide_feed_item(id: str):
+async def hide_feed_item(request: Request, id: str):
+    session_id = request.cookies.get("session_id", None)
+    if session_id is None:
+        return Response("Session ID not found", status_code=400)
+    
     # We also want to ensure that the item is not liked
     query = items.update().where(items.c.id == UUID(id)).values(hidden=True, liked=False)
     await database.execute(query)
-    return {"message": f"Feed item {id} hidden successfully"}
+    return Response(f"Feed item {id} hidden successfully").set_cookie("session_id", session_id, max_age=3600)
 
 
 @app.get("/api/onething")
