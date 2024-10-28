@@ -2,4 +2,5 @@ src/node_modules/
 __pycache__/
 **/*.egg-info/
 
+.logs
 items.db
