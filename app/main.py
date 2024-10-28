@@ -3,7 +3,8 @@ from fastapi import FastAPI, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 
 from uuid import UUID, uuid4
 from random import shuffle
@@ -38,13 +39,13 @@ async def clear_timed_out_cache():
             del cache[key]
 
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(clear_timed_out_cache, "interval", minutes=30)
+scheduler = AsyncIOScheduler()
 
 
 # Create the tables when the application starts
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    scheduler.add_job(clear_timed_out_cache, IntervalTrigger(minutes=30))
     scheduler.start()
     await database.connect()
     metadata.create_all(engine)
