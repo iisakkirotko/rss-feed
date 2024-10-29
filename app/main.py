@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Form, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -73,8 +73,8 @@ async def read_root(request: Request):
 
 
 @app.post("/api/add_feed")
-def add_feed_route(url: str):
-    return add_feed(url)
+async def add_feed_route(url: str = Form(...)):
+    return await add_feed(url)
 
 
 @app.get("/api/feed")

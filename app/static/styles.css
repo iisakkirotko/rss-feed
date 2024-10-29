@@ -1,10 +1,12 @@
 :root {
+    --color-primary: #007bff;
     --color-background: #f8f8f8;
     --color-background-secondary: #f0f0f0;
     --color-text-primary: #1c1c1c;
     --color-text-secondary: #4b4b4b;
 
     --color-error: #f44336;
+    --color-success: #4caf50;
 }
 
 body {
@@ -53,6 +55,80 @@ button {
     border: none;
     cursor: pointer;
     color: var(--color-text-primary);
+}
+
+button#add-feed{
+    position: fixed;
+    bottom: 36px;
+    right: 36px;
+
+    height: 56px;
+    width: 56px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-primary);
+    border-radius: 10px;
+    z-index: 3;
+}
+
+button#add-submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: var(--color-success);
+    height: 56px;
+    width: 56px;
+    border-radius: 10px;
+}
+
+button#add-feed .material-symbols-outlined {
+    font-size: 24px;
+    color: white;
+}
+
+form#add-feed-form {
+    position: fixed;
+    bottom: 36px;
+    right: 36px;
+    width: 0;
+    height: 56px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--color-background-secondary);
+    border-radius: 10px;
+    transition: 0.3s ease all;
+    overflow: hidden;
+    z-index: 2;
+}
+
+form#add-feed-form.active {
+    width: 350px;
+    padding-left: 12px;
+    z-index: 4;
+}
+
+form#add-feed-form input {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    border: none;
+    flex-grow: 1;
+    height: 24px;
+    padding: 4px 12px;
+}
+
+div#backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.33);
+    z-index: 2;
 }
 
 .error {

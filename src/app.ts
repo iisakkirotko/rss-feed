@@ -156,6 +156,17 @@ function createSnackbar(message: string, error: boolean, timeout: number): void 
     }
 }
 
+function createBackdrop(callback: () => void): void {
+    const backdrop = document.createElement("div");
+    backdrop.id = "backdrop";
+    document.getElementsByTagName("body")[0].appendChild(backdrop);
+    backdrop.addEventListener("click", () => {
+        backdrop.remove();
+        if (callback) {
+            callback();
+        }
+    });
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -163,6 +174,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         let endIndex = 10;
         await fetchContents(startIndex, endIndex);
         const feedEnd = document.querySelector('#bottom-of-feed');
+        const addFeedButton = document.getElementById("add-feed");
+        const addFeedForm = document.getElementById("add-feed-form");
 
         // Observe the bottom of the feed container coming into view to trigger loading more content
         const observer = new IntersectionObserver((entries) => {
@@ -197,7 +210,41 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!feedEnd) {
             throw new Error("Failed to find feed container");
         }
+        if (!addFeedButton) {
+            throw new Error("Failed to find add feed button");
+        }
+        if (!addFeedForm) {
+            throw new Error("Failed to find add feed form");
+        }
         observer.observe(feedEnd);
+        addFeedButton.addEventListener("click", () => {
+            const addForm = document.getElementById("add-feed-form");
+            if (addForm) {
+                addForm.classList.toggle("active");
+                createBackdrop(() => {
+                    addForm.classList.remove("active");
+                });
+            }
+        });
+        addFeedForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const feedUrl = document.getElementById("feed-url") as HTMLInputElement;
+            if (!feedUrl) {
+                throw new Error("Failed to find feed url input");
+            }
+            try {
+                const response = await fetch(`/api/add_feed?url=${feedUrl.value}`, {method: "POST"});
+                if (response.status !== 200) {
+                    const responseText = await response.text();
+                    throw new Error(`Invalid response: ${responseText}`);
+                }
+                createSnackbar("Feed added successfully", false, 6000);
+                feedUrl.value = "";
+            } catch (error) {
+                console.error(`Failed to add feed: ${error}`);
+                createSnackbar(`Failed to add feed: ${error}`, true, 6000);
+            }
+        });
     } catch (error) {
         console.error(`Failed to load contents: ${error}`);
         createSnackbar(`Failed to load contents: ${error}`, true, 6000);
