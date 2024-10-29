@@ -160,8 +160,6 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, vo
         let endIndex = 10;
         yield fetchContents(startIndex, endIndex);
         const feedEnd = document.querySelector('#bottom-of-feed');
-        const addFeedButton = document.getElementById("add-feed");
-        const addFeedForm = document.getElementById("add-feed-form");
         // Observe the bottom of the feed container coming into view to trigger loading more content
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
@@ -193,13 +191,21 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, vo
         if (!feedEnd) {
             throw new Error("Failed to find feed container");
         }
+        observer.observe(feedEnd);
+    }
+    catch (error) {
+        console.error(`Failed to load contents: ${error}`);
+        createSnackbar(`Failed to load contents: ${error}`, true, 6000);
+    }
+    try {
+        const addFeedButton = document.getElementById("add-feed");
+        const addFeedForm = document.getElementById("add-feed-form");
         if (!addFeedButton) {
             throw new Error("Failed to find add feed button");
         }
         if (!addFeedForm) {
             throw new Error("Failed to find add feed form");
         }
-        observer.observe(feedEnd);
         addFeedButton.addEventListener("click", () => {
             const addForm = document.getElementById("add-feed-form");
             if (addForm) {
@@ -231,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, vo
         }));
     }
     catch (error) {
-        console.error(`Failed to load contents: ${error}`);
-        createSnackbar(`Failed to load contents: ${error}`, true, 6000);
+        console.error(`Error when adding feed: ${error}`);
+        createSnackbar(`Error when adding feed: ${error}`, true, 6000);
     }
 }));
