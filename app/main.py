@@ -73,7 +73,7 @@ async def read_root(request: Request):
 
 
 @app.post("/api/add_feed")
-async def add_feed_route(url: str = Form(...)):
+async def add_feed_route(url: str):
     return await add_feed(url)
 
 
