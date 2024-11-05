@@ -87,7 +87,7 @@ function createActions(item) {
         catch (error) {
             likeButton.classList.toggle("liked");
             console.error(`Failed to like post: ${error}`);
-            createSnackbar(`Failed to like post: ${error}`, true, 6000);
+            createSnackbar({ message: `Failed to like post: ${error}`, timeout: 6000, color: "error" });
         }
     }));
     const hideButton = document.createElement("button");
@@ -117,12 +117,13 @@ function createActions(item) {
     actionsContainer.appendChild(hideButton);
     return actionsContainer;
 }
-function createSnackbar(message, error, timeout) {
+function createSnackbar(props) {
+    const { message, timeout, color } = props;
     const snackbar = document.createElement("div");
     snackbar.textContent = `${message}`;
     snackbar.classList.add("snackbar");
-    if (error) {
-        snackbar.classList.add("error");
+    if (color) {
+        snackbar.classList.add(color);
     }
     // Create a close button
     const closeButton = document.createElement("button");
@@ -180,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, vo
                     }
                     catch (error) {
                         console.error(`Failed to load contents: ${error}`);
-                        createSnackbar(`Failed to load contents: ${error}`, true, 6000);
+                        createSnackbar({ message: `Failed to load contents: ${error}`, timeout: 6000, color: "error" });
                     }
                 }
             });
@@ -195,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, vo
     }
     catch (error) {
         console.error(`Failed to load contents: ${error}`);
-        createSnackbar(`Failed to load contents: ${error}`, true, 6000);
+        createSnackbar({ message: `Failed to load contents: ${error}`, timeout: 6000, color: "error" });
     }
     try {
         const addFeedButton = document.getElementById("add-feed");
@@ -227,17 +228,23 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, vo
                     const responseText = yield response.text();
                     throw new Error(`Invalid response: ${responseText}`);
                 }
-                createSnackbar("Feed added successfully", false, 6000);
+                createSnackbar({ message: "Feed added successfully", timeout: 6000, color: "success" });
                 feedUrl.value = "";
+                const addForm = document.getElementById("add-feed-form");
+                const backdrop = document.getElementById("backdrop");
+                if (addForm && backdrop) {
+                    addForm.classList.remove("active");
+                    backdrop.remove();
+                }
             }
             catch (error) {
                 console.error(`Failed to add feed: ${error}`);
-                createSnackbar(`Failed to add feed: ${error}`, true, 6000);
+                createSnackbar({ message: `Failed to add feed: ${error}`, timeout: 6000, color: "error" });
             }
         }));
     }
     catch (error) {
         console.error(`Error when adding feed: ${error}`);
-        createSnackbar(`Error when adding feed: ${error}`, true, 6000);
+        createSnackbar({ message: `Error when adding feed: ${error}`, timeout: 6000, color: "error" });
     }
 }));
