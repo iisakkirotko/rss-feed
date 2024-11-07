@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 from random import shuffle
 from typing import TypedDict
 from datetime import datetime
+from pathlib import Path
 
 import feedparser
 
@@ -55,10 +56,11 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-templates = Jinja2Templates(directory="templates")
+template_dir = Path(__file__).parent / "templates"
+templates = Jinja2Templates(directory=template_dir)
 
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 
 
 @app.get("/")
