@@ -35,13 +35,16 @@ async def parse_rss(url: str) -> list[FeedItem]:
             # Probably HTML, let's strip it
             soup = BeautifulSoup(item["summary"], "html.parser")
             summary = soup.get_text()
+        link = item["link"]
+        if link.startswith("https://old.reddit.com"):
+            link = link.replace("https://old.reddit.com", "https://reddit.com")
         else:
             summary = item["summary"]
         feed_item = FeedItem(
             title=item["title"],
             id=uuid4(),
             guid=item["guid"] or str(uuid4()),
-            link=item["link"],
+            link=link,
             published=item["published"],
             summary=summary,
             media=media,
