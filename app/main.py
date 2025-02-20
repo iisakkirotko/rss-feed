@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Form, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from jinja2 import pass_context
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -55,9 +56,20 @@ async def lifespan(app: FastAPI):
     await database.disconnect()
 
 
+# We override HTTP URLs to HTTPS
+@pass_context
+def https_url_for(context: dict, name: str, **path_params) -> str:
+    request = context["request"]
+    http_url = request.url_for(name, **path_params)
+    if scheme := request.headers.get('x-forwarded-proto'):
+        return http_url.replace(scheme=scheme)
+    return http_url
+
+
 app = FastAPI(lifespan=lifespan)
 template_dir = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=template_dir)
+templates.env.globals['url_for'] = https_url_for
 
 
 app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
